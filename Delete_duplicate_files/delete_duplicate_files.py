@@ -1,6 +1,23 @@
 __version__='0'
 
 import os
+
+def deletefiles(folder:str, flist:list[str]):
+    nopermission_files = []
+    deleted = 0
+    notFoundFiles=[]
+    for file in flist:
+        try:
+            os.remove(os.path.join(folder, file))
+            deleted += 1
+        except PermissionError:
+            nopermission_files.append(file)
+        except FileNotFoundError:
+            notFoundFiles.append(file)
+    return {'deleted': deleted,
+            'nopermission_files': nopermission_files,
+            'notFoundFiles': notFoundFiles}
+
 while True:
     folder1=input('Enter full address of folder 1: ')
     folder2=input('Enter full address of folder 2: ')
@@ -22,16 +39,18 @@ if len(duplicates)>0:
         print(file)
     isdelete=input(f'\n!!! Do you want to delete these files from {folder1} ? (y/n): ')
     if isdelete.lower()=='y':
-        nopermission_files=[]
-        deleted=0
-        for file in duplicates:
-            try:
-                os.remove(os.path.join(folder1,file))
-                deleted+=1
-            except PermissionError:
-                nopermission_files.append(file)
-        print(f'{deleted} file(s) deleted.')
+        deleted=deletefiles(folder1,duplicates)
+        if deleted['nopermission_files']:
+            print('\nThe following files can not be deleted:')
+            for file in deleted['nopermission_files']:
+                print(file)
+        if deleted['notFoundFiles']:
+            print(f"\n{len(deleted['notFoundFiles'])} file(s) have not been found.")
+        print (f"\n{deleted['deleted']} files deleted.")
     else:
         print('Files are not deleted.')
 else:
     print('Nothing is deleted.')
+
+
+
