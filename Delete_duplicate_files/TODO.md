@@ -7,3 +7,7 @@ In version 0:
 5. ~~Write description.~~
 6. ~~check if directories exist~~
 7. Add GUI
+8. Redo it based on Classes. Use Class methods as a toogle to the working mode.
+9. Add possibiliti to work with any amout od initial directories, including 1.
+10. Work with nested folders.
+11. Consider the mode of comparing 2 backup copies. Wich files are missing? Wha if those copies are on a different notconnected PCs?
