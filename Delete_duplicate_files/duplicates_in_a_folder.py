@@ -10,6 +10,7 @@ import datetime
 
 
 class Myfile:
+    lastid=0
     id: int
     name: str  # name with extension
     shortname: str  # name without extension
@@ -23,7 +24,9 @@ class Myfile:
     modified: str
     accessed: str
 
+
     def __init__(self, name, directory):
+        self.id=Myfile.incrementid()
         self.name = name
         self.directory = directory
         self.address = os.path.join(self.directory, self.name)
@@ -45,6 +48,12 @@ class Myfile:
         else:
             return self.name
 
+    @classmethod
+    def incrementid (cls):
+        cls.lastid+=1
+        return cls.lastid
+
+
 
 # while True:
 #     try:
@@ -63,5 +72,6 @@ for root, dirs, files in os.walk(userfolder):
         myfiles.append(Myfile(file, root))
 
 for f in myfiles:
-    print(f.name, f.shortname, f.extension, f.size, f.address)
+    print(f.id, f.name, f.shortname, f.extension, f.size, f.address)
     # print(type(f.created))
+
