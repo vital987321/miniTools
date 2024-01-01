@@ -1,5 +1,5 @@
 __version__ = '0'
-"""App ask the user to input addresses of two local directories.
+"""App asks the user to input addresses of two local directories.
     App looks for duplicate files (based on name).
     App removes duplicate files from the first directory.
     App skips files for  which access is not granted (for example "read only" files).
