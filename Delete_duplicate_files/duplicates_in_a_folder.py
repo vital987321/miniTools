@@ -10,7 +10,7 @@ import datetime
 
 
 class Myfile:
-    lastid=0
+
     id: int
     name: str  # name with extension
     shortname: str  # name without extension
@@ -23,7 +23,10 @@ class Myfile:
     created: str
     modified: str
     accessed: str
-
+    # Class properties
+    lastid = 0
+    check_parameters=['name', 'size']
+    ignore_extensions = []
 
     def __init__(self, name, directory):
         self.id=Myfile.incrementid()
@@ -75,3 +78,4 @@ for f in myfiles:
     print(f.id, f.name, f.shortname, f.extension, f.size, f.address)
     # print(type(f.created))
 
+sorted_files=list() # row not finished
