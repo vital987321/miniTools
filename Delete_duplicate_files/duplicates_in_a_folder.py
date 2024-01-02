@@ -11,10 +11,10 @@ import datetime
 
 class Myfile:
     id: int
-    name: str  # name with extension
-    shortname: str  # name without extension
-    address: str  # with file name
-    directory: str  # without file name
+    name: str           # name with extension
+    shortname: str      # name without extension
+    address: str        # with file name
+    directory: str      # without file name
     extension: str
     size: int
     # readonly: bool
@@ -22,6 +22,7 @@ class Myfile:
     created: str
     modified: str
     accessed: str
+
     # Class properties
     lastid = 0
     check_parameters = ['name', 'size']     # recommended ['name', 'size']
@@ -74,6 +75,7 @@ class Myfile:
 #         raise Exception('Folder is not found. Enter correct address.')
 
 userfolder = r'C:\Users\velychko\Desktop\duptest'
+
 myfiles = []
 for root, dirs, files in os.walk(userfolder):
     for file in files:
@@ -85,6 +87,10 @@ duplicates = []
 groupopen = False
 isduplicate = False
 for i in range(1, len(sorted_files)):
+    if sorted_files[i].extension in Myfile.ignore_extensions:
+        groupopen = False
+        continue
+
     for parameter in Myfile.check_parameters:
         if getattr(sorted_files[i], parameter) == getattr(sorted_files[i - 1], parameter):
             isduplicate = True
@@ -102,11 +108,12 @@ for i in range(1, len(sorted_files)):
     else:
         groupopen = False
 
-for l in duplicates:
-    print(l)
-
 with open(os.path.join(userfolder, 'duplicates.txt'), "w") as output:
-    for group in duplicates:
-        output.write(f'\n{len(group)} copies of file {group[0].name}:\n')
-        for file in group:
-            output.write(f'\t{file.name},\t{file.directory}\n')
+    if duplicates:
+        for group in duplicates:
+            output.write(f'\n{len(group)} copies of file {group[0].name}:\n')
+            for file in group:
+                output.write(f'\t{file.name},\t{file.directory}\n')
+    else:
+        output.write('No duplicates found.')
+    print (f'Results are written to file {os.path.join(userfolder, "duplicates.txt")}')
