@@ -24,7 +24,7 @@ class Myfile:
     accessed: str
     # Class properties
     lastid = 0
-    check_parameters = ['name', 'size']
+    check_parameters = ['name', 'size']     # recommended ['name', 'size']
     ignore_extensions = []
 
     def __init__(self, name, directory):
@@ -104,3 +104,9 @@ for i in range(1, len(sorted_files)):
 
 for l in duplicates:
     print(l)
+
+with open(os.path.join(userfolder, 'duplicates.txt'), "w") as output:
+    for group in duplicates:
+        output.write(f'\n{len(group)} copies of file {group[0].name}:\n')
+        for file in group:
+            output.write(f'\t{file.name},\t{file.directory}\n')
