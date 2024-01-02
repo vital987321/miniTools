@@ -10,7 +10,6 @@ import datetime
 
 
 class Myfile:
-
     id: int
     name: str  # name with extension
     shortname: str  # name without extension
@@ -25,11 +24,11 @@ class Myfile:
     accessed: str
     # Class properties
     lastid = 0
-    check_parameters=['name', 'size']
+    check_parameters = ['name', 'size']
     ignore_extensions = []
 
     def __init__(self, name, directory):
-        self.id=Myfile.incrementid()
+        self.id = Myfile.incrementid()
         self.name = name
         self.directory = directory
         self.address = os.path.join(self.directory, self.name)
@@ -39,6 +38,9 @@ class Myfile:
         self.created = datetime.datetime.fromtimestamp(os.stat(self.address).st_ctime).strftime('%Y-%m-%d %H:%M')
         self.accessed = datetime.datetime.fromtimestamp(os.stat(self.address).st_atime).strftime('%Y-%m-%d %H:%M')
         self.modified = datetime.datetime.fromtimestamp(os.stat(self.address).st_mtime).strftime('%Y-%m-%d %H:%M')
+
+    def __repr__(self):
+        return self.name
 
     def __getextension(self):
         if '.' in self.name:
@@ -51,11 +53,16 @@ class Myfile:
         else:
             return self.name
 
-    @classmethod
-    def incrementid (cls):
-        cls.lastid+=1
-        return cls.lastid
+    def getsortingkey(self):
+        key = ''
+        for parameter in Myfile.check_parameters:
+            key += str(getattr(self, parameter))
+        return key
 
+    @classmethod
+    def incrementid(cls):
+        cls.lastid += 1
+        return cls.lastid
 
 
 # while True:
@@ -66,16 +73,34 @@ class Myfile:
 #     except:
 #         raise Exception('Folder is not found. Enter correct address.')
 
-userfolder = 'D:\git\miniTools'
+userfolder = r'C:\Users\velychko\Desktop\duptest'
 myfiles = []
 for root, dirs, files in os.walk(userfolder):
     for file in files:
-        # print(os.path.join(root, file))
-        print(os.stat(os.path.join(root, file)).st_size)
         myfiles.append(Myfile(file, root))
 
-for f in myfiles:
-    print(f.id, f.name, f.shortname, f.extension, f.size, f.address)
-    # print(type(f.created))
+sorted_files = sorted(myfiles, key=lambda x: x.getsortingkey())
 
-sorted_files=list() # row not finished
+duplicates = []
+groupopen = False
+isduplicate = False
+for i in range(1, len(sorted_files)):
+    for parameter in Myfile.check_parameters:
+        if getattr(sorted_files[i], parameter) == getattr(sorted_files[i - 1], parameter):
+            isduplicate = True
+        else:
+            isduplicate = False
+            break
+    if isduplicate:
+        if groupopen:
+            duplicates[-1].append(sorted_files[i])
+        else:
+            duplicates.append([])
+            groupopen = True
+            duplicates[-1].append(sorted_files[i - 1])
+            duplicates[-1].append(sorted_files[i])
+    else:
+        groupopen = False
+
+for l in duplicates:
+    print(l)
