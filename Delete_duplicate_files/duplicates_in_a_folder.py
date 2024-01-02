@@ -1,8 +1,9 @@
 __version__ = '0'
-"""App asks the user to input address of a local directory.
-    App looks for duplicate files (based on name).
-    # App skips files for  which access is not granted (for example "read only" files).
-    App checks nested folders.
+""" App looks for duplicate files in an inputted and nested folders.
+    App asks the user to input address of a local directory.
+    App looks for duplicate files based on specified parameters.
+        Parameters by default are file name and file size.
+    App writes to file the list of found duplicates. 
 """
 
 import os
@@ -24,11 +25,11 @@ class Myfile:
     accessed: str
 
     # Class properties
-    lastid = 0
+    __last_id = 0
     check_parameters = ['name', 'size']     # recommended ['name', 'size']
-    ignore_extensions = []
+    ignore_extensions = []                  # for example: 'mp3', 'sys'
 
-    def __init__(self, name, directory):
+    def __init__(self, name:str, directory: str):
         self.id = Myfile.incrementid()
         self.name = name
         self.directory = directory
@@ -40,30 +41,30 @@ class Myfile:
         self.accessed = datetime.datetime.fromtimestamp(os.stat(self.address).st_atime).strftime('%Y-%m-%d %H:%M')
         self.modified = datetime.datetime.fromtimestamp(os.stat(self.address).st_mtime).strftime('%Y-%m-%d %H:%M')
 
-    def __repr__(self):
+    def __repr__(self)->str:
         return self.name
 
-    def __getextension(self):
+    def __getextension(self) -> str:
         if '.' in self.name:
             return self.name.split('.')[-1]
         return ''
 
-    def __getshortname(self):
+    def __getshortname(self) -> str:
         if '.' in self.name:
             return self.name[:len(self.name) - len(self.extension) - 1]
         else:
             return self.name
 
-    def getsortingkey(self):
+    def getsortingkey(self) -> str:
         key = ''
         for parameter in Myfile.check_parameters:
             key += str(getattr(self, parameter))
         return key
 
     @classmethod
-    def incrementid(cls):
-        cls.lastid += 1
-        return cls.lastid
+    def incrementid(cls) -> int:
+        cls.__last_id += 1
+        return cls.__last_id
 
 
 # while True:
@@ -76,44 +77,49 @@ class Myfile:
 
 userfolder = r'C:\Users\velychko\Desktop\duptest'
 
+# Making a list of all files in the directory
 myfiles = []
 for root, dirs, files in os.walk(userfolder):
     for file in files:
         myfiles.append(Myfile(file, root))
 
-sorted_files = sorted(myfiles, key=lambda x: x.getsortingkey())
+# Sorting files list
+myfiles = sorted(myfiles, key=lambda x: x.getsortingkey())
 
+# Making a list of groups of duplicates
 duplicates = []
 groupopen = False
 isduplicate = False
-for i in range(1, len(sorted_files)):
-    if sorted_files[i].extension in Myfile.ignore_extensions:
+for i in range(1, len(myfiles)):
+    if myfiles[i].extension in Myfile.ignore_extensions:
         groupopen = False
         continue
 
     for parameter in Myfile.check_parameters:
-        if getattr(sorted_files[i], parameter) == getattr(sorted_files[i - 1], parameter):
+        if getattr(myfiles[i], parameter) == getattr(myfiles[i - 1], parameter):
             isduplicate = True
         else:
             isduplicate = False
             break
     if isduplicate:
         if groupopen:
-            duplicates[-1].append(sorted_files[i])
+            duplicates[-1].append(myfiles[i])
         else:
             duplicates.append([])
             groupopen = True
-            duplicates[-1].append(sorted_files[i - 1])
-            duplicates[-1].append(sorted_files[i])
+            duplicates[-1].append(myfiles[i - 1])
+            duplicates[-1].append(myfiles[i])
     else:
         groupopen = False
 
+
+# writing list of duplicates to file
 with open(os.path.join(userfolder, 'duplicates.txt'), "w") as output:
     if duplicates:
         for group in duplicates:
             output.write(f'\n{len(group)} copies of file {group[0].name}:\n')
             for file in group:
                 output.write(f'\t{file.name},\t{file.directory}\n')
+        print(f'Results are written to file {os.path.join(userfolder, "duplicates.txt")}')
     else:
-        output.write('No duplicates found.')
-    print (f'Results are written to file {os.path.join(userfolder, "duplicates.txt")}')
+        print('No duplicates found.')
