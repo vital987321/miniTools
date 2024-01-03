@@ -28,6 +28,7 @@ class Myfile:
     __last_id = 0
     check_parameters = ['name', 'size']     # recommended ['name', 'size']
     ignore_extensions = []                  # for example: 'mp3', 'sys'
+    criteria='modified'                     # criteria for preserving copy
 
     def __init__(self, name:str, directory: str):
         self.id = Myfile.incrementid()
@@ -61,10 +62,37 @@ class Myfile:
             key += str(getattr(self, parameter))
         return key
 
+    def delete(self):
+        try:
+            os.remove(self.address)
+            return 'deleted'
+        except PermissionError:
+            return 'no_permission'
+        except FileNotFoundError:
+            return 'not_found'
+
     @classmethod
     def incrementid(cls) -> int:
         cls.__last_id += 1
         return cls.__last_id
+
+
+def report(deletedfiles, directory:str=''):
+    report =f'Number of deleted files: {len(deletedfiles["deleted"])}\n'
+    if deletedfiles['no_permission']:
+        report+=f'Files without permission to delete ( total: {len(deletedfiles["no_permission"])}):\n'
+        for file in deletedfiles["no_permission"]:
+            report+=f'\t{file.name}\t{file.directory}'
+    if deletedfiles['not_found']:
+        report+=f'The following files are not found ( total: {len(deletedfiles["not_found"])}):\n'
+        for file in deletedfiles["not_found"]:
+            report+=f'\t{file.name}\t{file.directory}'
+    if not directory:
+            print (report)
+    else:
+        with open(os.path.join(directory, 'deletion_report.txt'), "w") as output:
+            output.write(report)
+
 
 
 # while True:
@@ -75,7 +103,7 @@ class Myfile:
 #     except:
 #         raise Exception('Folder is not found. Enter correct address.')
 
-userfolder = r'C:\Users\velychko\Desktop\duptest'
+userfolder = r'C:\Users\velychko\Desktop\dt'
 
 # Making a list of all files in the directory
 myfiles = []
@@ -112,14 +140,46 @@ for i in range(1, len(myfiles)):
     else:
         groupopen = False
 
+# what to do with duplicates?
+if duplicates:
+
+else:
+    print('No duplicates found.')
 
 # writing list of duplicates to file
-with open(os.path.join(userfolder, 'duplicates.txt'), "w") as output:
-    if duplicates:
-        for group in duplicates:
-            output.write(f'\n{len(group)} copies of file {group[0].name}:\n')
-            for file in group:
-                output.write(f'\t{file.name},\t{file.directory}\n')
-        print(f'Results are written to file {os.path.join(userfolder, "duplicates.txt")}')
-    else:
-        print('No duplicates found.')
+# with open(os.path.join(userfolder, 'duplicates.txt'), "w") as output:
+#     if duplicates:
+#         for group in duplicates:
+#             output.write(f'\n{len(group)} copies of file {group[0].name}:\n')
+#             for file in group:
+#                 output.write(f'\t{file.name},\t{file.directory}\n')
+#         print(f'Results are written to file {os.path.join(userfolder, "duplicates.txt")}')
+#     else:
+#         print('No duplicates found.')
+
+# test
+if duplicates:
+    for group in duplicates:
+        print(f'\n{len(group)} copies of file {group[0].name}:\n')
+        for file in group:
+            print(f'\t{file.name},\t{file.directory},\t{file.modified}\n')
+else:
+    print('No duplicates found.')
+
+#removing duplicates
+if duplicates:
+    deletedfiles={'deleted':[], 'no_permission':[], 'not_found':[]}
+    for group in duplicates:
+        group.sort(key=lambda x: x.modified)
+        for i in range(len(group)-1):
+            delstatus=group[i].delete()
+            deletedfiles[delstatus].append(group[i])
+    report(deletedfiles)
+else:
+    print('No duplicates found.')
+
+
+
+
+
+
