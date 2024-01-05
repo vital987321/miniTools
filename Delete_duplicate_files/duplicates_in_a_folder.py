@@ -77,6 +77,53 @@ class Myfile:
         return cls.__last_id
 
 
+class FilesGroup:
+    files:list[Myfile]
+    def __int__(self, files:tuple[Myfile]=()):
+        self.files=list(files)
+
+    def append(self, myfile:Myfile):
+        self.files.append(myfile)
+
+    @classmethod
+    def getfolderfiles(cls, directory: str):
+        allfiles=[]
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                allfiles.append(Myfile(file, root))
+        return cls(allfiles)
+
+
+
+
+
+# while True:
+#     try:
+#         userfolder = input('Enter full address of the folder: ')
+#         os.listdir(userfolder)
+#         break
+#     except:
+#         raise Exception('Folder is not found. Enter correct address.')
+
+userfolder = r'C:\Users\velychko\Desktop\dt'
+
+# Making a group with all files in the directory
+allfiles=FilesGroup.getfolderfiles(userfolder)
+
+# Sorting files list
+
+
+
+
+
+
+
+
+
+
+# old approach
+#######################
+
 def report(deletedfiles, directory:str=''):
     report =f'Number of deleted files: {len(deletedfiles["deleted"])}\n'
     if deletedfiles['no_permission']:
@@ -94,16 +141,6 @@ def report(deletedfiles, directory:str=''):
             output.write(report)
 
 
-
-# while True:
-#     try:
-#         userfolder = input('Enter full address of the folder: ')
-#         os.listdir(userfolder)
-#         break
-#     except:
-#         raise Exception('Folder is not found. Enter correct address.')
-
-userfolder = r'C:\Users\velychko\Desktop\dt'
 
 # Making a list of all files in the directory
 myfiles = []
@@ -142,6 +179,13 @@ for i in range(1, len(myfiles)):
 
 # what to do with duplicates?
 if duplicates:
+    userchoice = input('\n---------------- ? ----------------\n'
+                       'Select what shell be done with duplicates:\n'
+                       '\t1 - show in console.\n'
+                       '\t2 - save to file.\n'
+                       '\t3 - delete and report to console.\n'
+                       '\t4 - delete and report to file.\n'
+                       '\t\tUser choice: ')
 
 else:
     print('No duplicates found.')
