@@ -1,0 +1,1 @@
+This application scans hard disk for duplicates.
